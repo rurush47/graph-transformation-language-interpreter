@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
 using LevelGenerator;
 using Microsoft.Msagl.Drawing;
 
@@ -18,20 +20,23 @@ namespace GraphTransformationLanguage
     {
         private Lexer _lexer;
         private Token _lookahead;
-        private Dictionary<string, string> _config = new Dictionary<string, string>();
-        private List<Rule> _rules = new List<Rule>();
-        private Graph _startGraph;
-        private int _numVerticesParsed;
 
+        public Dictionary<string, string> Config { get; }
+        public Graph StartGraph;
+        public List<Rule> Rules { get; }
+        public List<string> Production { get; }
+        
         public Parser(Lexer lexer)
         {
+            Config = new Dictionary<string, string>();
+            Rules = new List<Rule>();
+            Production = new List<string>();
             _lexer = lexer;
             _lookahead = lexer.GetNextToken();
         }
 
         public void ParseFile()
         {
-            //konfiguracja, graf_początkowy, reguły, [produkcja];
             ParseConfig();
             ParseStartGraph();
             ParseRules();
@@ -77,7 +82,6 @@ namespace GraphTransformationLanguage
 
         private void ParseConfigList()
         {
-            // list -> singleConfig ;
             while (_lookahead.Type == TokenType.Identifier)
             {
                 ParseSingleConfig();
@@ -87,7 +91,6 @@ namespace GraphTransformationLanguage
 
         private void ParseSingleConfig()
         {
-            // singleConfig -> id = id | number
             string key = Match(TokenType.Identifier).Identifier;
             string val = "";
 
@@ -95,24 +98,24 @@ namespace GraphTransformationLanguage
             switch (_lookahead.Type)
             {
                 case TokenType.Identifier:
-                    val = Match(TokenType.Identifier).ToString();
+                    val = Match(TokenType.Identifier).Identifier;
                     break;
                 case TokenType.Number:
-                    val = Match(TokenType.Number).ToString();
+                    val = Match(TokenType.Number).Identifier;
                     break;
                 default:
                     Error("Identifier or number");
                     break;
             }
 
-            _config.Add(key, val);
+            Config.Add(key, val);
         }
         
         private void ParseStartGraph()
         {
             Match(TokenType.Start);
             Match(TokenType.LBrace);
-            _startGraph = ParseGraph();
+            StartGraph = ParseGraph();
             Match(TokenType.Semicolon);
             Match(TokenType.RBrace);
         }
@@ -129,7 +132,8 @@ namespace GraphTransformationLanguage
         {
             while (_lookahead.Type == TokenType.VBar)
             {
-                ParseSingleRule();
+                Rule rule = ParseSingleRule();
+                Rules.Add(rule);
                 Match(TokenType.Semicolon);
             }
         }
@@ -143,8 +147,10 @@ namespace GraphTransformationLanguage
             Match(TokenType.Translate);
             Graph rightSide = ParseGraph();
             
-            //TODO create normal rule
-            return new Rule();
+            Rule rule = new Rule();
+            rule.SetRule(name, leftSide, rightSide);
+            
+            return rule;
         }
         
         private void ParseProduction()
@@ -156,10 +162,6 @@ namespace GraphTransformationLanguage
                 ParseProductionList();
                 Match(TokenType.RBrace);    
             }
-            else
-            {
-                //TODO check for EOF
-            }
         }
 
         private void ParseProductionList()
@@ -167,6 +169,7 @@ namespace GraphTransformationLanguage
             while (_lookahead.Type == TokenType.Identifier)
             {
                 string name = Match(TokenType.Identifier).Identifier;
+                Production.Add(name);
                 Match(TokenType.Comma);
             }
         }
@@ -174,6 +177,7 @@ namespace GraphTransformationLanguage
         private Graph ParseGraph()
         {
             Graph g = new Graph();
+            
             ParseEdgeList(g);
             while (_lookahead.Type == TokenType.Comma)
             {
@@ -181,40 +185,48 @@ namespace GraphTransformationLanguage
                 ParseEdgeList(g);
             }
             
-            return new Graph();
+            return g;
         }
-
+        
         private void ParseEdgeList(Graph g)
         {
-            ParseNodeIdentifier(g);
-
+            Node currentNode = ParseNodeIdentifier(g);
+            g.AddNode(currentNode);
+            
             while (_lookahead.Type == TokenType.Edge)
             {
                 Match(TokenType.Edge);
-                ParseNodeIdentifier(g);
+                Node newNode = ParseNodeIdentifier(g);
+                g.AddNode(newNode);
+                
+                g.AddEdge(currentNode.Id, newNode.Id);
+                currentNode = newNode;
             }
         }
 
-        private void ParseNodeIdentifier(Graph g)
+        private Node ParseNodeIdentifier(Graph g)
         {
-            switch (_lookahead.Type)
+            int ruleID = -1;
+
+            if (_lookahead.Type == TokenType.Number)
             {
-                case TokenType.Identifier:
-                    Match(TokenType.Identifier);
-                    break;
-                case TokenType.Number:
-                    Match(TokenType.Number);
-                    Match(TokenType.Colon);
-                    Match(TokenType.Identifier);
-                    break;
+                ruleID = int.Parse(Match(TokenType.Number).Identifier);
+                Match(TokenType.Colon);
+            }
+            var symbol = Match(TokenType.Identifier).Identifier;
+
+            Node node = g.Nodes.FirstOrDefault(n => n.NodeSymbol == symbol && n.RuleNodeID == ruleID);
+            if (node != null)
+            {
+                return node;                
             }
 
-            AddNodeToGraph(g);
-        }
-
-        private void AddNodeToGraph(Graph graph)
-        {
-            
+            node = new Node(g.GetNewID().ToString())
+            {
+                NodeSymbol = symbol,
+                RuleNodeID = ruleID
+            };
+            return node;
         }
     }
 }
