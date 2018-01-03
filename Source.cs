@@ -50,5 +50,14 @@ namespace GraphTransformationLanguage
         {
             return "Line: " + LineNumber + " Position: " + PositionInLine;
         }
+
+        public Position GetPosition()
+        {
+            return new Position()
+            {
+                Line = LineNumber,
+                Symbol = PositionInLine
+            };
+        }
     }
 }

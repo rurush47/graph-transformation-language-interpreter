@@ -36,27 +36,27 @@ namespace GraphTransformationLanguage
                 else if (_c == ';')
                 {
                     Consume();
-                    return new Token(TokenType.Semicolon, ";");
+                    return CreateToken(TokenType.Semicolon, ";");
                 }
                 else if (_c == ',')
                 {
                     Consume();
-                    return new Token(TokenType.Colon, ",");
+                    return CreateToken(TokenType.Colon, ",");
                 }
                 else if (_c == '{')
                 {
                     Consume();
-                    return new Token(TokenType.LBrace, "{");
+                    return CreateToken(TokenType.LBrace, "{");
                 }
                 else if (_c == '}')
                 {
                     Consume();
-                    return new Token(TokenType.RBrace, "}");
+                    return CreateToken(TokenType.RBrace, "}");
                 }
                 else if (_c == '|')
                 {
                     Consume();
-                    return new Token(TokenType.VBar, "|");
+                    return CreateToken(TokenType.VBar, "|");
                 }
                 else if (_c == '-')
                 {
@@ -64,7 +64,11 @@ namespace GraphTransformationLanguage
                     if (_c == '>')
                     {
                         Consume();
-                        return new Token(TokenType.Edge, "->");
+                        return CreateToken(TokenType.Edge, "->");
+                    }
+                    else
+                    {
+                        RaiseError();
                     }
                 }
                 else if (_c == '=')
@@ -76,7 +80,7 @@ namespace GraphTransformationLanguage
                         if (_c == '>')
                         {
                             Consume();
-                            return new Token(TokenType.Translate, "==>");
+                            return CreateToken(TokenType.Translate, "==>");
                         }
                         else
                         {
@@ -85,7 +89,7 @@ namespace GraphTransformationLanguage
                     }
                     else
                     {
-                        return new Token(TokenType.Equals, "=");
+                        return CreateToken(TokenType.Equals, "=");
                     }
                 }
                 else if (char.IsDigit(_c))
@@ -96,7 +100,7 @@ namespace GraphTransformationLanguage
                         v += _c;
                         Consume();
                     }
-                    return new Token(TokenType.Number, v);
+                    return CreateToken(TokenType.Number, v);
                 }
                 else if (char.IsLetter(_c))
                 {
@@ -108,26 +112,35 @@ namespace GraphTransformationLanguage
                     }
                     if (v == "config")
                     {
-                        return new Token(TokenType.Configuration, v);                        
+                        return CreateToken(TokenType.Configuration, v);                        
                     }
                     else if (v == "rules")
                     {
-                        return new Token(TokenType.Rules, v);
+                        return CreateToken(TokenType.Rules, v);
                     }
                     else if(v == "production")
                     {
-                        return new Token(TokenType.Production, v);
-                    }                    
-                    return new Token(TokenType.Identifier, v);
+                        return CreateToken(TokenType.Production, v);
+                    }      
+                    else if(v == "start")
+                    {
+                        return CreateToken(TokenType.Start, v);
+                    } 
+                    return CreateToken(TokenType.Identifier, v);
                 }
                 else
                 {
                     RaiseError();
                 }
             }
-            return new Token(TokenType.EOF, "<EOF>");
+            return CreateToken(TokenType.EOF, "<EOF>");
         }
 
+        private Token CreateToken(TokenType tokenType, string value)
+        {
+            return new Token(tokenType, value, _source.GetPosition());
+        }
+        
         private void Consume()
         {
             _c = _source.GetNextChar();

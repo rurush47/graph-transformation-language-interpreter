@@ -16,18 +16,27 @@
         Number,
         Comma,
         Identifier,
-        VBar
+        VBar,
+        Start
+    }
+    
+    public struct Position
+    {   
+        public int Symbol;
+        public int Line;
     }
     
     public class Token
     {
         public TokenType Type { get; set; }
         public string Identifier { get; set; }
-
-        public Token(TokenType type, string identifier)
+        public Position Position { get; set;}
+        
+        public Token(TokenType type, string identifier, Position pos)
         {
             Type = type;
             Identifier = identifier;
+            Position = pos;
         }
     }
 }
