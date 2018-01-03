@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GraphTransformationLanguage;
-using LevelGenerator;
 using Microsoft.Msagl.Drawing;
 using NUnit.Framework;
 
