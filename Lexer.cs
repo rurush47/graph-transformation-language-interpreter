@@ -38,10 +38,15 @@ namespace GraphTransformationLanguage
                     Consume();
                     return CreateToken(TokenType.Semicolon, ";");
                 }
+                else if (_c == ':')
+                {
+                    Consume();
+                    return CreateToken(TokenType.Colon, ":");
+                }
                 else if (_c == ',')
                 {
                     Consume();
-                    return CreateToken(TokenType.Colon, ",");
+                    return CreateToken(TokenType.Comma, ",");
                 }
                 else if (_c == '{')
                 {
@@ -102,10 +107,12 @@ namespace GraphTransformationLanguage
                     }
                     return CreateToken(TokenType.Number, v);
                 }
-                else if (char.IsLetter(_c))
+                else if (char.IsLetter(_c) || _c == '_')
                 {
                     string v = "";
-                    while (!_source.EndOfFile && char.IsLetter(_c))
+                    while (!_source.EndOfFile && (char.IsLetter(_c) ||
+                                                  _c == '_'  ||
+                                                  char.IsDigit(_c)))
                     {
                         v += _c;
                         Consume();
