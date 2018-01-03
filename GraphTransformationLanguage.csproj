@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Msagl.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8a3d7c21d5fa1306">
+      <HintPath>..\..\graph-grammar-level-generator\LevelGenerator\bin\Debug\Microsoft.Msagl.Drawing.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,6 +50,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source.cs" />
     <Compile Include="Token.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\graph-grammar-level-generator\Drawing\drawing.csproj">
+      <Project>{B76F8F71-4B00-4242-BE36-C9F0732511F7}</Project>
+      <Name>drawing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

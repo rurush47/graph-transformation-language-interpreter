@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using Microsoft.Msagl.Drawing;
 
 namespace GraphTransformationLanguage
 {
@@ -9,25 +9,15 @@ namespace GraphTransformationLanguage
         public InvalidTokenException(string message)
             : base(message)
         {
-     
+            
         }    
-    }
-    
-    struct Config
-    {
-
     }
 
     struct Rule
     {
-
+        
     }
-
-    struct Graph
-    {
-
-    }
-
+    
     public class Parser
     {
         private Lexer _lexer;

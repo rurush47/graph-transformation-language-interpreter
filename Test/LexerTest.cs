@@ -34,7 +34,7 @@ namespace Test
             Assert.AreEqual(tokens[7].Type, TokenType.RBrace);
             Assert.AreEqual(tokens[8].Type, TokenType.Edge);
             Assert.AreEqual(tokens[9].Type, TokenType.Number);
-            Assert.AreEqual(tokens[10].Type, TokenType.Colon);
+            Assert.AreEqual(tokens[10].Type, TokenType.Comma);
             Assert.AreEqual(tokens[11].Type, TokenType.Identifier);
             Assert.AreEqual(tokens[12].Type, TokenType.VBar);
             Assert.AreEqual(tokens[13].Type, TokenType.Translate);

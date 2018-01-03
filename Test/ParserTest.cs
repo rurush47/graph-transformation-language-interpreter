@@ -15,7 +15,11 @@ namespace Test
             Lexer lexer = new Lexer(source);
             Parser parser = new Parser(lexer);
             
-            Assert.AreEqual(true, true);
+            Assert.DoesNotThrow(parser.ParseFile);
+            
+            source = new Source(_testFilesPath + @"\test_parser2.txt");
+            lexer = new Lexer(source);
+            parser = new Parser(lexer);
             Assert.DoesNotThrow(parser.ParseFile);
         }
         
