@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LevelGenerator;
 using Microsoft.Msagl.Drawing;
 
 namespace GraphTransformationLanguage
@@ -11,11 +12,6 @@ namespace GraphTransformationLanguage
         {
             
         }    
-    }
-
-    struct Rule
-    {
-        
     }
     
     public class Parser
