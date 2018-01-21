@@ -13,16 +13,22 @@ namespace GraphTransformationLanguage
             
         }    
     }
+
+    public class Config
+    {
+        public string Key;
+        public string Value;
+    }
     
     public class Parser
     {
         private Lexer _lexer;
         private Token _lookahead;
 
-        public Dictionary<string, string> Config { get; }
+        public Dictionary<string, string> Config { get; private set; }
         public Graph StartGraph;
         public List<Rule> Rules { get; }
-        public List<string> Production { get; }
+        public List<string> Production { get; set; }
         public bool FixedProduction { get; private set; }
 
         public Parser(Lexer lexer)
@@ -75,21 +81,31 @@ namespace GraphTransformationLanguage
         {
             Match(TokenType.Configuration);
             Match(TokenType.LBrace);
-            ParseConfigList();
+            Config = ParseConfigList();
             Match(TokenType.RBrace);
         }
 
-        private void ParseConfigList()
+        private Dictionary<string, string> ParseConfigList()
         {
-            while (_lookahead.Type == TokenType.Identifier)
+            Dictionary<string, string> config = new Dictionary<string, string>();
+
+            Config result = ParseSingleConfig(); 
+            while (result != null)
             {
-                ParseSingleConfig();
-                Match(TokenType.Semicolon);
+                config.Add(result.Key, result.Value);
+                result = ParseSingleConfig();
             }
+            
+            return config;
         }
 
-        private void ParseSingleConfig()
+        private Config ParseSingleConfig()
         {
+            if (_lookahead.Type != TokenType.Identifier)
+            {
+                return null;
+            }
+            
             string key = Match(TokenType.Identifier).Identifier;
             string val = "";
 
@@ -106,8 +122,13 @@ namespace GraphTransformationLanguage
                     Error("Identifier or number");
                     break;
             }
-
-            Config.Add(key, val);
+            
+            Match(TokenType.Semicolon);
+            return new Config
+            {
+                Key = key,
+                Value = val
+            };
         }
         
         private void ParseStartGraph()
@@ -158,7 +179,7 @@ namespace GraphTransformationLanguage
             {
                 Match(TokenType.Production);
                 Match(TokenType.LBrace);
-                ParseProductionList();
+                Production = ParseProductionList();
                 Match(TokenType.RBrace);
 
                 FixedProduction = true;
@@ -168,14 +189,18 @@ namespace GraphTransformationLanguage
             FixedProduction = false;
         }
 
-        private void ParseProductionList()
+        private List<string> ParseProductionList()
         {
+            List<string> production = new List<string>();
+            
             while (_lookahead.Type == TokenType.Identifier)
             {
                 string name = Match(TokenType.Identifier).Identifier;
-                Production.Add(name);
+                production.Add(name);
                 Match(TokenType.Comma);
             }
+
+            return production;
         }
 
         private Graph ParseGraph()
