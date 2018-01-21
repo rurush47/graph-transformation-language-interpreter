@@ -23,7 +23,8 @@ namespace GraphTransformationLanguage
         public Graph StartGraph;
         public List<Rule> Rules { get; }
         public List<string> Production { get; }
-        
+        public bool FixedProduction { get; private set; }
+
         public Parser(Lexer lexer)
         {
             Config = new Dictionary<string, string>();
@@ -158,8 +159,13 @@ namespace GraphTransformationLanguage
                 Match(TokenType.Production);
                 Match(TokenType.LBrace);
                 ParseProductionList();
-                Match(TokenType.RBrace);    
+                Match(TokenType.RBrace);
+
+                FixedProduction = true;
+                return;
             }
+
+            FixedProduction = false;
         }
 
         private void ParseProductionList()
